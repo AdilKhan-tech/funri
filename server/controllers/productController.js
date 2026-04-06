@@ -1,18 +1,21 @@
 const Product = require("../models/Product");
-// const Gender = require("../models/Product");
-// const getPagination = require("../utils/pagination");
 const { Op } = require("sequelize");
 
-class GenderController {
+class ProductController {
 
     static async createProduct(req, res, next) {
         try {
-            const { name_en, price, } = req.body;
+            const { name, name_en, price } = req.body;
+            const finalName = name || name_en;
 
-            const image_url = req.file?.path || null;
+            if (!finalName) {
+                return res.status(400).json({ message: "name is required" });
+            }
+
+            const image_url = req.file?.path || "";
 
             const product = await Product.create({
-                name_en,
+                name: finalName,
                 price,
                 image_url,
             });
@@ -22,55 +25,48 @@ class GenderController {
         }
     }
 
-    // static async getAllGenders(req, res) {
-    //     const { page, limit, offset } = getPagination(req);
-    //     const { keywords, sortField, sortOrder } = req.query;
+    static async getAllProducts(req, res) {
+        const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+        const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 10, 1), 100);
+        const offset = (page - 1) * limit;
+        const { keywords, sortField, sortOrder } = req.query;
 
-    //     try {
-    //         const whereClause = {};
-    
-    //         if (keywords) {
-    //             whereClause[Op.or] = [
-    //             { name_en: { [Op.like]: `%${keywords}%` } },
-    //             { name_ar: { [Op.like]: `%${keywords}%` } },
-    //             ];
-    //         }
-    
-    //         const allowedSortFields = [
-    //             "id",
-    //             "name_en",
-    //             "name_ar",
-    //             "price"
-    //         ];
-    
-    //         const finalSortField = allowedSortFields.includes(sortField) ? sortField : "id";
-    //         const finalSortOrder = sortOrder && sortOrder.toUpperCase() === "ASC" ? "ASC" : "DESC";
-        
-    //         const { count, rows } = await Gender.findAndCountAll({
-    //             where: whereClause,
-    //             limit,
-    //             offset,
-    //             order: [[finalSortField, finalSortOrder]],
-    //         });
-    
-    //         const pageCount = Math.ceil(count / limit);
-        
-    //         return res.status(200).json({
-    //             pagination: {
-    //                 page,
-    //                 limit,
-    //                 total: count,
-    //                 pageCount,
-    //             },
-    //             data: rows,
-    //         });
-    //     } catch (error) {
-    //         return res.status(500).json({
-    //             message: "Failed to retrieve genders",
-    //             error: error.message,
-    //         });
-    //     }
-    // }
+        try {
+            const whereClause = {};
+
+            if (keywords) {
+                whereClause[Op.or] = [
+                    { name: { [Op.like]: `%${keywords}%` } },
+                ];
+            }
+
+            const allowedSortFields = ["id", "name", "price", "created_at", "updated_at"];
+            const finalSortField = allowedSortFields.includes(sortField) ? sortField : "id";
+            const finalSortOrder = sortOrder && sortOrder.toUpperCase() === "ASC" ? "ASC" : "DESC";
+
+            const { count, rows } = await Product.findAndCountAll({
+                where: whereClause,
+                limit,
+                offset,
+                order: [[finalSortField, finalSortOrder]],
+            });
+
+            return res.status(200).json({
+                pagination: {
+                    page,
+                    limit,
+                    total: count,
+                    pageCount: Math.ceil(count / limit),
+                },
+                data: rows,
+            });
+        } catch (error) {
+            return res.status(500).json({
+                message: "Failed to retrieve products",
+                error: error.message,
+            });
+        }
+    }
 
     static async updateProductById(req, res, next) {
         const { id } = req.params;
@@ -82,7 +78,7 @@ class GenderController {
         
             const { name_en, price, } = req.body;
         
-            const image_url = req.file?.path || product.image_url;
+            const image_url = req.file?.path || product.image_url || "";
         
             await gender.update({
                 name_en: name_en ?? product.name_en,
@@ -112,4 +108,4 @@ class GenderController {
     }
 }
 
-module.exports = GenderController;
+module.exports = ProductController;

@@ -9,6 +9,19 @@ class UserController {
         const {user_name, phone_number, password} = req.body;
 
         try {
+            if (!user_name || !phone_number || !password) {
+                return res.status(400).json({
+                    message: "user_name, phone_number and password are required",
+                });
+            }
+
+            const existingUser = await User.findOne({ where: { phone_number } });
+            if (existingUser) {
+                return res.status(409).json({
+                    message: "Phone number already registered",
+                });
+            }
+
             const hashedPassword = await bcrypt.hash(password, 10);
 
             const user = await User.create({
@@ -21,7 +34,21 @@ class UserController {
                 data: user
             });
         } catch (error) {
-            res.status(500).json({message: "Failed to create user",
+            if (error.name === "SequelizeUniqueConstraintError") {
+                return res.status(409).json({
+                    message: "Phone number already registered",
+                });
+            }
+
+            if (error.name === "SequelizeValidationError") {
+                return res.status(400).json({
+                    message: "Invalid user data",
+                    error: error.errors?.[0]?.message || error.message,
+                });
+            }
+
+            res.status(500).json({
+                message: "Failed to create user",
                 error: error.message
             });
         }
@@ -30,10 +57,18 @@ class UserController {
     static async login(req, res) {
         try {
             const { phone_number, password } = req.body;
+            const jwtSecret = process.env.JWT_SECRET;
 
             if (!phone_number || !password) {
                 return res.status(400).json({
                     message: "Phone number & password are required"
+                });
+            }
+
+            if (!jwtSecret) {
+                return res.status(500).json({
+                    message: "Server configuration error",
+                    error: "JWT_SECRET is not configured"
                 });
             }
 
@@ -51,7 +86,7 @@ class UserController {
             // JWT Token generate
             const token = jwt.sign(
                 { id: user.id, phone_number: user.phone_number },
-                process.env.JWT_SECRET,
+                jwtSecret,
                 { expiresIn: "365d" }
             );
 

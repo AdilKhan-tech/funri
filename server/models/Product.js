@@ -19,7 +19,7 @@ const Product = sequelize.define(
     },
     image_url: {
       type: DataTypes.STRING(250),
-      allowNull: true,
+      allowNull: false,
     },
     created_at: {
       type: DataTypes.DATE,
@@ -33,7 +33,7 @@ const Product = sequelize.define(
     },
   },
   {
-    tableName: "Products",
+    tableName: "products",
     timestamps: false,
   },
 );

@@ -29,5 +29,4 @@ const errorHandler = (err, req, res, next) => {
     message,
   });
 };
-console.error(err)
 module.exports = errorHandler;
