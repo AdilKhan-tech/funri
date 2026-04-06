@@ -1,0 +1,17 @@
+const express = require("express");
+const router = express.Router();
+const ProductController = require('../controllers/productController');
+const authenticateToken = require("../middlewares/authenticateToken");
+
+// const upload = require("../middlewares/upload")
+
+router.use(authenticateToken);
+
+
+router.post('/create', ProductController.createProduct);
+// router.get('/', GenderController.getAllGenders);
+// router.put('/update/:id', upload.single("image_url"),  GenderController.updateGenderById);
+// router.delete('/delete/:id', GenderController.deleteGenderById);
+
+
+module.exports = router;

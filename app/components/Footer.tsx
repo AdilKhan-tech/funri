@@ -59,16 +59,16 @@ export default function Footer() {
             <div className="row links-wrap">
               <div className="col-6 col-sm-6 col-md-3">
                 <ul className="list-unstyled">
-                  <li><a href="#">About us</a></li>
-                  <li><a href="#">Services</a></li>
-                  <li><a href="#">Blog</a></li>
-                  <li><a href="#">Contact us</a></li>
+                  <li><a href="../about">About us</a></li>
+                  <li><a href="../services">Services</a></li>
+                  <li><a href="../blog">Blog</a></li>
+                  <li><a href="contact">Contact us</a></li>
                 </ul>
               </div>
 
               <div className="col-6 col-sm-6 col-md-3">
                 <ul className="list-unstyled">
-                  <li><a href="#">Support</a></li>
+                  <li><a href="../shop">Shop</a></li>
                   <li><a href="#">Knowledge base</a></li>
                   <li><a href="#">Live chat</a></li>
                 </ul>
@@ -99,8 +99,8 @@ export default function Footer() {
             <div className="col-lg-6">
               <p className="mb-2 text-center text-lg-start">
                 Copyright &copy;{new Date().getFullYear()}. All Rights Reserved. &mdash; Designed with love by{' '}
-                <a href="https://untree.co">Untree.co</a> Distributed By{' '}
-                <a href="https://themewagon.com">ThemeWagon</a>
+                <a href="https://my-portfolio-website-hazel-gamma.vercel.app/">AdilTech.co</a> Distributed By{' '}
+                <a href="https://www.codenterprise.com/">CodeEnterprise</a>
               </p>
             </div>
 
