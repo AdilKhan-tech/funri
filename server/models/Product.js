@@ -9,17 +9,31 @@ const Product = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    name: {
+    product_name: {
       type: DataTypes.STRING(100),
       allowNull: false,
     },
     price: {
       type: DataTypes.FLOAT,
+      allowNull: false,
+    },
+    category: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+    },
+    stock_quantity: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
+    description: {
+      type: DataTypes.TEXT,
       allowNull: true,
     },
-    image_url: {
+    product_image: {
       type: DataTypes.STRING(250),
-      allowNull: false,
+      allowNull: true,
+      defaultValue: "",
     },
     created_at: {
       type: DataTypes.DATE,
