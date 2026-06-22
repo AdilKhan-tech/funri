@@ -5,19 +5,43 @@ class ProductController {
 
     static async createProduct(req, res, next) {
         try {
-            const { name, name_en, price } = req.body;
-            const finalName = name || name_en;
+            const {
+                product_name,
+                name,
+                name_en,
+                price,
+                category,
+                stock_quantity,
+                description,
+                product_image,
+                image_url,
+            } = req.body;
 
-            if (!finalName) {
-                return res.status(400).json({ message: "name is required" });
+            const finalProductName = product_name || name || name_en;
+            if (!finalProductName) {
+                return res.status(400).json({ message: "product_name is required" });
+            }
+            if (price === undefined || price === null || Number.isNaN(Number(price))) {
+                return res.status(400).json({ message: "price must be a valid number" });
+            }
+            if (!category) {
+                return res.status(400).json({ message: "category is required" });
             }
 
-            const image_url = req.file?.path || "";
+            const finalStockQuantity = stock_quantity === undefined ? 0 : Number(stock_quantity);
+            if (!Number.isInteger(finalStockQuantity) || finalStockQuantity < 0) {
+                return res.status(400).json({ message: "stock_quantity must be a non-negative integer" });
+            }
+
+            const finalProductImage = req.file?.path || product_image || image_url || "";
 
             const product = await Product.create({
-                name: finalName,
-                price,
-                image_url,
+                product_name: finalProductName,
+                price: Number(price),
+                category,
+                stock_quantity: finalStockQuantity,
+                description: description || "",
+                product_image: finalProductImage,
             });
             return res.status(201).json(product);
         }catch (error) {
@@ -35,12 +59,10 @@ class ProductController {
             const whereClause = {};
 
             if (keywords) {
-                whereClause[Op.or] = [
-                    { name: { [Op.like]: `%${keywords}%` } },
-                ];
+                whereClause[Op.or] = [{ product_name: { [Op.like]: `%${keywords}%` } }];
             }
 
-            const allowedSortFields = ["id", "name", "price", "created_at", "updated_at"];
+            const allowedSortFields = ["id", "product_name", "price", "category", "stock_quantity", "created_at", "updated_at"];
             const finalSortField = allowedSortFields.includes(sortField) ? sortField : "id";
             const finalSortOrder = sortOrder && sortOrder.toUpperCase() === "ASC" ? "ASC" : "DESC";
 
@@ -75,17 +97,41 @@ class ProductController {
             if (!product) {
                 return res.status(404).json({ message: "Product not found" });
             }
-        
-            const { name_en, price, } = req.body;
-        
-            const image_url = req.file?.path || product.image_url || "";
-        
-            await gender.update({
-                name_en: name_en ?? product.name_en,
-                price: price ?? product.price,
-                image_url: image_url
+
+            const {
+                product_name,
+                name,
+                name_en,
+                price,
+                category,
+                stock_quantity,
+                description,
+                product_image,
+                image_url,
+            } = req.body;
+
+            const finalProductName = product_name ?? name ?? name_en ?? product.product_name;
+            const finalPrice = price === undefined ? product.price : Number(price);
+            if (Number.isNaN(finalPrice)) {
+                return res.status(400).json({ message: "price must be a valid number" });
+            }
+
+            const rawStock = stock_quantity === undefined ? product.stock_quantity : Number(stock_quantity);
+            if (!Number.isInteger(rawStock) || rawStock < 0) {
+                return res.status(400).json({ message: "stock_quantity must be a non-negative integer" });
+            }
+
+            const finalProductImage = req.file?.path || product_image || image_url || product.product_image || "";
+
+            await product.update({
+                product_name: finalProductName,
+                price: finalPrice,
+                category: category ?? product.category,
+                stock_quantity: rawStock,
+                description: description ?? product.description,
+                product_image: finalProductImage,
             });
-        
+
             return res.status(200).json(product);
     
         }catch (error) {
