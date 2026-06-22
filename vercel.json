@@ -1,5 +1,15 @@
 
 {
+  "name": "furni",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "cd client && npm install && npm run build",
+    "start": "cd client && npm start",
+    "dev": "cd client && npm run dev"
+  }
+}
+{
   "buildCommand": "cd client && npm install && npm run build",
   "outputDirectory": "client/.next",
   "installCommand": "cd client && npm install",

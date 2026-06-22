@@ -4,9 +4,41 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 
 export default function Contact() {
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    alert('Message sent!');
+    
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    
+    const data = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+      subject: formData.get('subject'),
+      message: formData.get('message'),
+    };
+
+    try {
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${API_BASE}/email/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+      
+      if (response.ok) {
+        alert('Message sent successfully!');
+        form.reset();
+      } else {
+        alert('Failed to send message: ' + result.message);
+      }
+    } catch (error) {
+      alert('Error sending message');
+      console.error(error);
+    }
   };
 
   return (
@@ -32,16 +64,17 @@ export default function Contact() {
               <h2 className="section-title mb-3">Get In Touch</h2>
               <form onSubmit={handleSubmit}>
                 <div className="form-group mb-3">
-                  <input type="text" className="form-control" placeholder="Your Name" required />
+                  <input type="text" name="name" className="form-control" placeholder="Your Name" required />
                 </div>
                 <div className="form-group mb-3">
-                  <input type="email" className="form-control" placeholder="Your Email" required />
+                  <input type="email" name="email" className="form-control" placeholder="Your Email" required />
                 </div>
                 <div className="form-group mb-3">
-                  <input type="text" className="form-control" placeholder="Subject" />
+                  <input type="text" name="subject" className="form-control" placeholder="Subject" />
                 </div>
                 <div className="form-group mb-3">
                   <textarea
+                    name="message"
                     className="form-control"
                     placeholder="Message"
                     rows={5}
